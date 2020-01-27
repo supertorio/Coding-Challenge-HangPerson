@@ -1,0 +1,6 @@
+export const GAME_STATUSES = {
+  IN_ROUND: 'IN_ROUND',
+  LOSE: 'LOSE',
+  WIN: 'WIN',
+  COMPLETE: 'COMPLETE'
+}
