@@ -111,6 +111,7 @@ export default {
       this.gameInstance.resetGame()
       this.gameInstance.nextRound()
       this.currentRound = 1
+      this.currentScore = 0
       this.syncGameState(this.gameInstance.getPuzzleBoard())
       this.gameStatus = this.GAME_STATUSES.IN_ROUND
     }

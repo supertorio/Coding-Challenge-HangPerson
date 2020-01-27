@@ -52,7 +52,7 @@ class HangPerson {
   resetGame() {
     this._word = ''
     this._guesses = []
-    this._missesRemaining = 0
+    this._missesRemaining = GAME_CONFIG.MISSES_PER_ROUND
     this._round = 0
     this.wordProvider.reset()
   }

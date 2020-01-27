@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="makeGuess" id="GuessInput">
-    <input v-model="currentGuess" type="text" ref="guessInput" />
+    <input v-model="currentGuess" type="text" ref="guessInput" maxlength="1" />
     <button type="submit" :disabled="!currentGuess" class="makeGuess">
       <span>Make Guess</span>
     </button>
@@ -17,7 +17,7 @@ export default {
   methods: {
     makeGuess() {
       if (!this.currentGuess) return
-      this.$emit('make-guess', this.currentGuess)
+      this.$emit('make-guess', this.currentGuess[0]) // Form should prevent multi-character input, but just in case
       this.$refs.guessInput.focus()
       this.currentGuess = ''
     }
