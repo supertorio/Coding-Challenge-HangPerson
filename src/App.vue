@@ -1,8 +1,13 @@
 <template>
   <div id="app">
-    <Nav v-bind:currentRound="currentRound" v-bind:totalRounds="TOTAL_ROUNDS" />
+    <Nav
+      :bus="bus"
+      :currentRound="currentRound"
+      :totalRounds="TOTAL_ROUNDS"
+      :currentScore="currentScore"
+    />
     <div id="GameBoard">
-      <Gallows v-bind:missesRemaining="missesRemaining" v-bind:missesAvailable="MISSES_AVAILABLE" />
+      <Gallows :missesRemaining="missesRemaining" :missesAvailable="MISSES_AVAILABLE" />
       <div class="user-area">
         <div id="CurrentWord">
           <ul>
@@ -11,7 +16,7 @@
         </div>
         <hr />
         <GuessInput v-if="gameStatus === GAME_STATUSES.IN_ROUND" @make-guess="makeGuess" />
-        <Messaging v-bind:gameStatus="gameStatus" @next-round="nextRound" @reset-game="resetGame" />
+        <Messaging :gameStatus="gameStatus" @next-round="nextRound" @reset-game="resetGame" />
         <p class="guesses">
           Guesses:
           <span>{{ playerGuesses.length ? playerGuesses.join(', ') : 'No Guesses' }}</span>
@@ -22,6 +27,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import HangPerson, {
   GUESS_RESULT,
   GAME_CONFIG
@@ -31,6 +37,10 @@ import Nav from './components/Nav'
 import Gallows from './components/Gallows'
 import GuessInput from './components/GuessInput'
 import Messaging from './components/Messaging'
+
+const GOOD_GUESS_POINTS = 50
+const BAD_GUESS_POINTS = -20
+const WIN_ROUND_POINTS = 100
 
 export default {
   name: 'app',
@@ -52,11 +62,13 @@ export default {
   },
   data() {
     return {
+      bus: new Vue(),
       gameBoard: [],
       missesRemaining: 0,
       playerGuesses: [],
       gameStatus: null,
-      currentRound: 1
+      currentRound: 1,
+      currentScore: 0
     }
   },
   methods: {
@@ -66,9 +78,17 @@ export default {
       this.syncGameState(gameState)
 
       // Handle Result conditions
-      if (guessResult === GUESS_RESULT.GAME_LOSE) {
+      if (guessResult === GUESS_RESULT.GOOD_GUESS) {
+        this.currentScore += GOOD_GUESS_POINTS
+      } else if (guessResult === GUESS_RESULT.BAD_GUESS) {
+        this.currentScore += BAD_GUESS_POINTS
+      } else if (guessResult === GUESS_RESULT.GAME_LOSE) {
         this.gameStatus = this.GAME_STATUSES.LOSE
+        this.currentScore += BAD_GUESS_POINTS
+        this.bus.$emit('roundComplete', this.currentScore)
       } else if (guessResult === GUESS_RESULT.GAME_WIN) {
+        this.currentScore += WIN_ROUND_POINTS
+        this.bus.$emit('roundComplete', this.currentScore)
         this.gameStatus =
           this.currentRound === this.TOTAL_ROUNDS
             ? (this.gameStatus = this.GAME_STATUSES.COMPLETE)
